@@ -52,7 +52,7 @@ BookStore.prototype.generateBookId = function() {
 		}
 	});
 	return maxBookId + 1;
-}
+};
 
 BookStore.prototype.remove = function() {
 	var booksRemoved = [];
@@ -151,7 +151,7 @@ BookStore.prototype.print = function() {
 	        if (Array.isArray(argument)) {
             	argument.forEach(function(el) {
             		if (el !== null && typeof el === 'object') {
-            		    console.log(el)
+            		    console.log(el);
             	    }
             	});
 	        } else if (argument !== null && typeof argument === 'object') {
@@ -173,7 +173,7 @@ var book = {
 store.add(book);    // Your implementation should 
                     // add a property called id to the book
 
-console.log(book.id) // should print an number, not undefined
+console.log(book.id); // should print an number, not undefined
 
 //###############################################################
 
@@ -202,7 +202,7 @@ console.log(res3);
 
 //###############################################
 
-var res4 = st.add(1, "foobar") // nothing is added, returns 0
+var res4 = st.add(1, "foobar"); // nothing is added, returns 0
 console.log(res4);
 
 //###############################################
@@ -234,7 +234,7 @@ console.log('3:', res1);
 res1 = st.add(book1, book2, book3, book4); // adds back all books
 console.log('4:', res1);
 
-res1 = st.remove(book1, book3.id)  // Removes book1 and book3, 
+res1 = st.remove(book1, book3.id);  // Removes book1 and book3, 
                             // second parameter is an ID of book3, 
                             // returns an array with two elements
 console.log('5:', res1);
