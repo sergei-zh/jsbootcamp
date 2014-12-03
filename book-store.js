@@ -35,12 +35,9 @@ BookStore.prototype.addArray = function(books) {
 
 BookStore.prototype.addSingleBook = function(book) {
     var addedBooks = [];
-    for (var bookIndex = 0; bookIndex < this._books.length; bookIndex++) {
-        var knownBook = this._books[bookIndex];
-        if (knownBook.name === book.name) {
-            /* Ignore a book with known name */
-            return addedBooks;
-        }
+    if (this.containsBook(book)) {
+        /* Ignore a book with known name */
+        return addedBooks;
     }
 
     if (!book.id) {
@@ -49,6 +46,16 @@ BookStore.prototype.addSingleBook = function(book) {
     this._books.push(book);
     addedBooks.push(book);
     return addedBooks;
+};
+
+BookStore.prototype.containsBook = function(book) {
+    for (var bookIndex = 0; bookIndex < this._books.length; bookIndex++) {
+        var knownBook = this._books[bookIndex];
+        if (knownBook.name.toUpperCase() === book.name.toUpperCase()) {
+            return true;
+        }
+    }
+    return false;
 };
 
 BookStore.prototype.generateBookId = function() {
