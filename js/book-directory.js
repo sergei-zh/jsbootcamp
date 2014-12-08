@@ -1,3 +1,6 @@
+define(["./book-store"], function(BookStore) {
+"use strict";
+
 function BookDirectory(bookStore) {
     this._bookStore = bookStore;
 }
@@ -178,7 +181,8 @@ BookDirectory.prototype.appendNewBook = function() {
 
 BookDirectory.prototype.setupAddBookListener = function() {
     var self = this;
-    document.getElementById('new-book-append-btn').addEventListener('click', function() {
+    document.getElementById('bs-add-book-form').addEventListener('submit', function(evt) {
+        evt.preventDefault();
         self.appendNewBook();
     });
 };
@@ -202,3 +206,5 @@ bookStore.add({name: 'Dracula'});
 
 var bookDirectory = new BookDirectory(bookStore);
 bookDirectory.run();
+
+});

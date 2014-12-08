@@ -3,6 +3,7 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script data-main="js/book-directory" src="js/require.js"></script>
     </head>
     <body>
         <div>
@@ -10,13 +11,10 @@
             <ol id="book-list">
             </ol>
         </div>
-        <div>
+        <form id="bs-add-book-form">
             <span>New Book:</span>
             <input id="new-book-name">
-            <button type="button" id="new-book-append-btn">Append</button>
-        </div>    
-        
-        <script src="./book-store.js"></script>
-        <script src="./book-directory.js"></script>
+            <button type="submit" id="new-book-append-btn">Append</button>
+        </form>    
     </body>
 </html>
