@@ -5,7 +5,9 @@ function BookDirectory(bookStore) {
     this._bookStore = bookStore;
 }
 
-BookDirectory.prototype.showBookList = function() {
+var _bdp = BookDirectory.prototype;
+        
+_bdp.showBookList = function() {
     var self = this;
     var bookList = document.getElementById('book-list');
     while (bookList.hasChildNodes()) {
@@ -19,7 +21,7 @@ BookDirectory.prototype.showBookList = function() {
     } 
 };
 
-BookDirectory.prototype.appendBook = function(book) {
+_bdp.appendBook = function(book) {
     var self = this;
     var bookList = document.getElementById('book-list');
     var bookNode = self.generateBookNode(book);
@@ -27,7 +29,7 @@ BookDirectory.prototype.appendBook = function(book) {
     bookList.appendChild(bookNode);
 };
 
-BookDirectory.prototype.removeBook = function(book) {
+_bdp.removeBook = function(book) {
     var self = this;
     var bookList = document.getElementById('book-list');
     var bookNode = document.getElementById('book-container-' + book.id);
@@ -37,7 +39,7 @@ BookDirectory.prototype.removeBook = function(book) {
     }
 };
 
-BookDirectory.prototype.setBookTitle = function(book, newTitle) {
+_bdp.setBookTitle = function(book, newTitle) {
     var self = this;
     if (newTitle.trim() === '') {
         alert('New name cannot be empty');
@@ -46,7 +48,7 @@ BookDirectory.prototype.setBookTitle = function(book, newTitle) {
     self.switchToDisplayMode(book);
 };
 
-BookDirectory.prototype.switchToEditMode = function(book) {
+_bdp.switchToEditMode = function(book) {
     var self = this;
     var bookNode = document.getElementById('book-container-' + book.id);
     if (bookNode) {
@@ -58,7 +60,7 @@ BookDirectory.prototype.switchToEditMode = function(book) {
     }
 };
 
-BookDirectory.prototype.switchToDisplayMode = function(book) {
+_bdp.switchToDisplayMode = function(book) {
     var self = this;
     var bookNode = document.getElementById('book-container-' + book.id);
     if (bookNode) {
@@ -70,7 +72,7 @@ BookDirectory.prototype.switchToDisplayMode = function(book) {
     }
 };
 
-BookDirectory.prototype.switchToDeleteMode = function(book) {
+_bdp.switchToDeleteMode = function(book) {
     var self = this;
     var bookNode = document.getElementById('book-container-' + book.id);
     if (bookNode) {
@@ -82,7 +84,7 @@ BookDirectory.prototype.switchToDeleteMode = function(book) {
     }
 };
 
-BookDirectory.prototype.generateBookNode = function(book) {
+_bdp.generateBookNode = function(book) {
     var self = this;
     var bookContainer = document.createElement('li');
     bookContainer.setAttribute('id', 'book-container-' + book.id);
@@ -91,7 +93,7 @@ BookDirectory.prototype.generateBookNode = function(book) {
     return bookContainer;
 };
 
-BookDirectory.prototype.generateDisplayableGuts = function(book) {
+_bdp.generateDisplayableGuts = function(book) {
     var self = this;
     var containerNode = document.createElement('span');
     var bookTitle = document.createTextNode(book.name);
@@ -113,7 +115,7 @@ BookDirectory.prototype.generateDisplayableGuts = function(book) {
     return containerNode;
 };
 
-BookDirectory.prototype.generateEditableGuts = function(book) {
+_bdp.generateEditableGuts = function(book) {
     var self = this;
     var containerNode = document.createElement('span');
     var bookTitle = document.createElement('input');
@@ -136,7 +138,7 @@ BookDirectory.prototype.generateEditableGuts = function(book) {
     return containerNode;
 };
 
-BookDirectory.prototype.generateDeletableGuts = function(book) {
+_bdp.generateDeletableGuts = function(book) {
     var self = this;
     var containerNode = document.createElement('span');
     var bookTitle = document.createTextNode(book.name);
@@ -158,7 +160,7 @@ BookDirectory.prototype.generateDeletableGuts = function(book) {
     return containerNode;
 };
 
-BookDirectory.prototype.appendNewBook = function() {
+_bdp.appendNewBook = function() {
     var self = this;
     var newBookName = document.getElementById('new-book-name').value;
     if (newBookName.trim() === '') {
@@ -179,7 +181,7 @@ BookDirectory.prototype.appendNewBook = function() {
     }
 };
 
-BookDirectory.prototype.setupAddBookListener = function() {
+_bdp.setupAddBookListener = function() {
     var self = this;
     document.getElementById('bs-add-book-form').addEventListener('submit', function(evt) {
         evt.preventDefault();
@@ -187,7 +189,7 @@ BookDirectory.prototype.setupAddBookListener = function() {
     });
 };
 
-BookDirectory.prototype.run = function() {
+_bdp.run = function() {
     var self = this;
     self.setupAddBookListener();
     self.showBookList();
