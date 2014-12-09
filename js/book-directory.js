@@ -18,6 +18,9 @@ _bdp.showBookList = function() {
         var book = books[bookIndex];
         var bookNode = self.generateBookNode(book);
         bookList.appendChild(bookNode);
+        document.getElementById('btn-edit-' + book.id).addEventListener('click', function() {
+            self.switchToEditMode(book);
+        });
     } 
 };
 
@@ -95,23 +98,29 @@ _bdp.generateBookNode = function(book) {
 
 _bdp.generateDisplayableGuts = function(book) {
     var self = this;
+    var template = document.getElementById('tmpl-book-display').innerHTML;
+    var html = template
+                    .replace(/{{book.name}}/g, book.name)
+                    .replace(/{{book.id}}/g, book.id);
+    
     var containerNode = document.createElement('span');
-    var bookTitle = document.createTextNode(book.name);
-    containerNode.appendChild(bookTitle);
-    var bookEdit = document.createElement('button');
-    bookEdit.setAttribute('id', 'book-edit-btn-' + book.id);
-    bookEdit.appendChild(document.createTextNode('Edit'));
-    bookEdit.addEventListener('click', function() {
-        self.switchToEditMode(book);
-    });
-    containerNode.appendChild(bookEdit);
-    var bookDelete = document.createElement('button');
-    bookDelete.setAttribute('id', 'book-delete-btn-' + book.id);
-    bookDelete.appendChild(document.createTextNode('Delete'));
-    bookDelete.addEventListener('click', function() {
-        self.switchToDeleteMode(book);
-    });
-    containerNode.appendChild(bookDelete);
+    containerNode.innerHTML = html;
+//    var bookTitle = document.createTextNode(book.name);
+//    containerNode.appendChild(bookTitle);
+//    var bookEdit = document.createElement('button');
+//    bookEdit.setAttribute('id', 'book-edit-btn-' + book.id);
+//    bookEdit.appendChild(document.createTextNode('Edit'));
+//    bookEdit.addEventListener('click', function() {
+//        self.switchToEditMode(book);
+//    });
+//    containerNode.appendChild(bookEdit);
+//    var bookDelete = document.createElement('button');
+//    bookDelete.setAttribute('id', 'book-delete-btn-' + book.id);
+//    bookDelete.appendChild(document.createTextNode('Delete'));
+//    bookDelete.addEventListener('click', function() {
+//        self.switchToDeleteMode(book);
+//    });
+//    containerNode.appendChild(bookDelete);
     return containerNode;
 };
 
