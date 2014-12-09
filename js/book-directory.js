@@ -14,46 +14,42 @@ function BookDirectory(bookStore) {
 }
 
 var _bdp = BookDirectory.prototype;
-        
+     
+_bdp.cleanNode = function(node) {
+    while (node.hasChildNodes()) {
+        node.removeChild(node.lastChild);
+    }
+};
+     
+_bdp.getBookListNode = function() {
+    return document.getElementById('book-list');
+};
+
+_bdp.getBookNode = function(bookId) {
+    return document.getElementById('book-container-' + bookId);
+};
+     
 _bdp.showBookList = function() {
     var self = this;
-    var bookList = document.getElementById('book-list');
-    while (bookList.hasChildNodes()) {
-        bookList.removeChild(bookList.lastChild);
-    }
+    var bookListNode = self.getBookListNode();
+    self.cleanNode(bookListNode);
     var books = self._bookStore.getAllBooks();
     for (var bookIndex in books) {
         var book = books[bookIndex];
         var bookNode = self.generateBookNode(book);
-        bookList.appendChild(bookNode);
+        bookListNode.appendChild(bookNode);
     } 
 };
 
 _bdp.appendBook = function(book) {
     var self = this;
-    var bookList = document.getElementById('book-list');
     var bookNode = self.generateBookNode(book);
-    
-    bookList.appendChild(bookNode);
+    self.getBookListNode().appendChild(bookNode);
 };
 
 _bdp.removeBook = function(book) {
     var self = this;
-    var bookList = document.getElementById('book-list');
-    var bookNode = document.getElementById('book-container-' + book.id);
-    if (bookNode) {
-        bookList.removeChild(bookNode);
-    }
-};
-
-_bdp.renameBook = function(bookId) {
-    var self = this;
-    var bookNameInput = document.getElementById('inp-book-new-name-' + bookId);
-    if (bookNameInput) {
-        var bookName = bookNameInput.value;
-        var book = self._bookStore.getBookById(bookId);
-        self.setBookTitle(book, bookName);
-    }
+    self.getBookListNode().removeChild(self.getBookNode(book.id));
 };
 
 _bdp.setBookTitle = function(bookId, newTitle) {
@@ -73,41 +69,29 @@ _bdp.setBookTitle = function(bookId, newTitle) {
 
 _bdp.switchToEditMode = function(bookId) {
     var self = this;
-    var bookNode = document.getElementById('book-container-' + bookId);
-    if (bookNode) {
-        while (bookNode.hasChildNodes()) {
-            bookNode.removeChild(bookNode.lastChild);
-        }
-        var book = self._bookStore.getBookById(bookId);
-        var editableGuts = self.generateEditableGuts(book);
-        bookNode.appendChild(editableGuts);
-    }
+    var bookNode = self.getBookNode(bookId);
+    self.cleanNode(bookNode);
+    var book = self._bookStore.getBookById(bookId);
+    var editableGuts = self.generateEditableGuts(book);
+    bookNode.appendChild(editableGuts);
 };
 
 _bdp.switchToDisplayMode = function(bookId) {
     var self = this;
-    var bookNode = document.getElementById('book-container-' + bookId);
-    if (bookNode) {
-        while (bookNode.hasChildNodes()) {
-            bookNode.removeChild(bookNode.lastChild);
-        }
-        var book = self._bookStore.getBookById(bookId);
-        var displayableGuts = self.generateDisplayableGuts(book);
-        bookNode.appendChild(displayableGuts);
-    }
+    var bookNode = self.getBookNode(bookId);
+    self.cleanNode(bookNode);
+    var book = self._bookStore.getBookById(bookId);
+    var displayableGuts = self.generateDisplayableGuts(book);
+    bookNode.appendChild(displayableGuts);
 };
 
 _bdp.switchToDeleteMode = function(bookId) {
     var self = this;
-    var bookNode = document.getElementById('book-container-' + bookId);
-    if (bookNode) {
-        while (bookNode.hasChildNodes()) {
-            bookNode.removeChild(bookNode.lastChild);
-        }
-        var book = self._bookStore.getBookById(bookId);
-        var deletableGuts = self.generateDeletableGuts(book);
-        bookNode.appendChild(deletableGuts);
-    }
+    var bookNode = self.getBookNode(bookId);
+    self.cleanNode(bookNode);
+    var book = self._bookStore.getBookById(bookId);
+    var deletableGuts = self.generateDeletableGuts(book);
+    bookNode.appendChild(deletableGuts);
 };
 
 _bdp.generateBookNode = function(book) {
@@ -121,12 +105,7 @@ _bdp.generateBookNode = function(book) {
 
 _bdp.generateDisplayableGuts = function(book) {
     var self = this;
-    var template = document.getElementById('tmpl-book-display').innerHTML;
-    var html = template
-                    .replace(/{{book.name}}/g, book.name)
-                    .replace(/{{book.id}}/g, book.id);
-    var containerNode = document.createElement('span');
-    containerNode.innerHTML = html;
+    var containerNode = self.renderTemplate('tmpl-book-display', book);
     containerNode.querySelector('.button-edit').addEventListener('click', function(e) {
         var bookId = parseInt(e.srcElement.dataset.bookId);
         self.switchToEditMode(bookId);
@@ -140,12 +119,7 @@ _bdp.generateDisplayableGuts = function(book) {
 
 _bdp.generateEditableGuts = function(book) {
     var self = this;
-    var template = document.getElementById('tmpl-book-edit').innerHTML;
-    var html = template
-                    .replace(/{{book.name}}/g, book.name)
-                    .replace(/{{book.id}}/g, book.id);
-    var containerNode = document.createElement('span');
-    containerNode.innerHTML = html;
+    var containerNode = self.renderTemplate('tmpl-book-edit', book);
     var bookName = containerNode.querySelector('.input-book-new-name');
     containerNode.querySelector('.form-book-edit').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -161,12 +135,7 @@ _bdp.generateEditableGuts = function(book) {
 
 _bdp.generateDeletableGuts = function(book) {
     var self = this;
-    var template = document.getElementById('tmpl-book-delete').innerHTML;
-    var html = template
-                    .replace(/{{book.name}}/g, book.name)
-                    .replace(/{{book.id}}/g, book.id);
-    var containerNode = document.createElement('span');
-    containerNode.innerHTML = html;
+    var containerNode = self.renderTemplate('tmpl-book-delete', book);
     containerNode.querySelector('.button-delete-confirm').addEventListener('click', function(e) {
         var bookId = parseInt(e.srcElement.dataset.bookId);
         var book = self._bookStore.getBookById(bookId);
@@ -177,6 +146,16 @@ _bdp.generateDeletableGuts = function(book) {
         self.switchToDisplayMode(bookId);
     });
     return containerNode;
+};
+
+_bdp.renderTemplate = function(templateName, book) {
+    var template = document.getElementById(templateName).innerHTML;
+    var html = template
+                    .replace(/{{book.name}}/g, book.name)
+                    .replace(/{{book.id}}/g, book.id);
+    var resultNode = document.createElement('span');
+    resultNode.innerHTML = html;
+    return resultNode; 
 };
 
 _bdp.appendNewBook = function() {
