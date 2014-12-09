@@ -19,22 +19,22 @@
         
         <script id="tmpl-book-display" type="text/template">
             <span>{{book.name}}</span>
-            <button type="button" data-book-id="{{book.id}}" class='button-edit' id="btn-edit-{{book.id}}">Edit</button>
-            <button type="button" data-book-id="{{book.id}}" id="btn-delete-{{book.id}}">Delete</button>
+            <button type="button" data-book-id="{{book.id}}" class='button-edit'>Edit</button>
+            <button type="button" data-book-id="{{book.id}}" class='button-delete'>Delete</button>
         </script>
         
         <script id="tmpl-book-edit" type="text/template">
-            <form id="form-book-edit" data-book-id="{{book.id}}" >
-                <input value="{{book.name}}">
-                <button type="submit" data-book-id="{{book.id}}" id="btn-edit-confirm-{{book.id}}">Confirm</button>
-                <button type="button" data-book-id="{{book.id}}" id="btn-edit-cancel-{{book.id}}">Cancel</button>
+            <form class="form-book-edit" data-book-id="{{book.id}}" >
+                <input class="input-book-new-name" value="{{book.name}}">
+                <button type="submit" data-book-id="{{book.id}}" class='button-edit-confirm'>Confirm</button>
+                <button type="button" data-book-id="{{book.id}}" class='button-edit-cancel'>Cancel</button>
             </form>
         </script>
         
         <script id="tmpl-book-delete" type="text/template">
             <span>{{book.name}}</span>
-            <button type="button" data-book-id="{{book.id}}" id="btn-delete-confirm-{{book.id}}">Confirm</button>
-            <button type="button" data-book-id="{{book.id}}" id="btn-delete-cancel-{{book.id}}">Cancel</button>
+            <button type="button" data-book-id="{{book.id}}" class='button-delete-confirm'">Confirm</button>
+            <button type="button" data-book-id="{{book.id}}" class='button-delete-cancel'">Cancel</button>
         </script>
         
     </body>

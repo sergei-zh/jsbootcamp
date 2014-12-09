@@ -18,9 +18,6 @@ _bdp.showBookList = function() {
         var book = books[bookIndex];
         var bookNode = self.generateBookNode(book);
         bookList.appendChild(bookNode);
-        document.getElementById('btn-edit-' + book.id).addEventListener('click', function() {
-            self.switchToEditMode(book);
-        });
     } 
 };
 
@@ -32,56 +29,71 @@ _bdp.appendBook = function(book) {
     bookList.appendChild(bookNode);
 };
 
-_bdp.removeBook = function(book) {
+_bdp.removeBook = function(bookId) {
     var self = this;
     var bookList = document.getElementById('book-list');
-    var bookNode = document.getElementById('book-container-' + book.id);
+    var bookNode = document.getElementById('book-container-' + bookId);
     if (bookNode) {
-        self._bookStore.remove(book);
+        self._bookStore.remove(bookId);
         bookList.removeChild(bookNode);
     }
 };
 
-_bdp.setBookTitle = function(book, newTitle) {
+_bdp.renameBook = function(bookId) {
+    var self = this;
+    var bookNameInput = document.getElementById('inp-book-new-name-' + bookId);
+    if (bookNameInput) {
+        var bookName = bookNameInput.value;
+        var book = self._bookStore.findBooksById(bookId)[0];
+        self.setBookTitle(book, bookName);
+    }
+};
+
+_bdp.setBookTitle = function(bookId, newTitle) {
     var self = this;
     if (newTitle.trim() === '') {
         alert('New name cannot be empty');
+        return;
     }    
+    var book = self._bookStore.findBooksById(bookId)[0];
     book.name = newTitle;
-    self.switchToDisplayMode(book);
+    self.switchToDisplayMode(bookId);
 };
 
-_bdp.switchToEditMode = function(book) {
+_bdp.switchToEditMode = function(bookId) {
     var self = this;
-    var bookNode = document.getElementById('book-container-' + book.id);
+    var bookNode = document.getElementById('book-container-' + bookId);
     if (bookNode) {
         while (bookNode.hasChildNodes()) {
             bookNode.removeChild(bookNode.lastChild);
         }
+        var book = self._bookStore.findBooksById(bookId)[0];
         var editableGuts = self.generateEditableGuts(book);
         bookNode.appendChild(editableGuts);
     }
 };
 
-_bdp.switchToDisplayMode = function(book) {
+_bdp.switchToDisplayMode = function(bookId) {
     var self = this;
-    var bookNode = document.getElementById('book-container-' + book.id);
+    var bookNode = document.getElementById('book-container-' + bookId);
     if (bookNode) {
         while (bookNode.hasChildNodes()) {
             bookNode.removeChild(bookNode.lastChild);
         }
+        var book = self._bookStore.findBooksById(bookId)[0];
         var displayableGuts = self.generateDisplayableGuts(book);
         bookNode.appendChild(displayableGuts);
     }
 };
 
-_bdp.switchToDeleteMode = function(book) {
+_bdp.switchToDeleteMode = function(bookId) {
     var self = this;
-    var bookNode = document.getElementById('book-container-' + book.id);
+    var bookNode = document.getElementById('book-container-' + bookId);
     if (bookNode) {
         while (bookNode.hasChildNodes()) {
             bookNode.removeChild(bookNode.lastChild);
         }
+        var book = self._bookStore.findBooksById(bookId)[0];
         var deletableGuts = self.generateDeletableGuts(book);
         bookNode.appendChild(deletableGuts);
     }
@@ -102,70 +114,56 @@ _bdp.generateDisplayableGuts = function(book) {
     var html = template
                     .replace(/{{book.name}}/g, book.name)
                     .replace(/{{book.id}}/g, book.id);
-    
     var containerNode = document.createElement('span');
     containerNode.innerHTML = html;
-//    var bookTitle = document.createTextNode(book.name);
-//    containerNode.appendChild(bookTitle);
-//    var bookEdit = document.createElement('button');
-//    bookEdit.setAttribute('id', 'book-edit-btn-' + book.id);
-//    bookEdit.appendChild(document.createTextNode('Edit'));
-//    bookEdit.addEventListener('click', function() {
-//        self.switchToEditMode(book);
-//    });
-//    containerNode.appendChild(bookEdit);
-//    var bookDelete = document.createElement('button');
-//    bookDelete.setAttribute('id', 'book-delete-btn-' + book.id);
-//    bookDelete.appendChild(document.createTextNode('Delete'));
-//    bookDelete.addEventListener('click', function() {
-//        self.switchToDeleteMode(book);
-//    });
-//    containerNode.appendChild(bookDelete);
+    containerNode.querySelector('.button-edit').addEventListener('click', function(e) {
+        var bookId = parseInt(e.srcElement.dataset.bookId);
+        self.switchToEditMode(bookId);
+    });
+    containerNode.querySelector('.button-delete').addEventListener('click', function(e) {
+        var bookId = parseInt(e.srcElement.dataset.bookId);
+        self.switchToDeleteMode(bookId);
+    });
     return containerNode;
 };
 
 _bdp.generateEditableGuts = function(book) {
     var self = this;
+    var template = document.getElementById('tmpl-book-edit').innerHTML;
+    var html = template
+                    .replace(/{{book.name}}/g, book.name)
+                    .replace(/{{book.id}}/g, book.id);
     var containerNode = document.createElement('span');
-    var bookTitle = document.createElement('input');
-    bookTitle.value = book.name;
-    containerNode.appendChild(bookTitle);
-    var bookSave = document.createElement('button');
-    bookSave.setAttribute('id', 'book-edit-save-btn-' + book.id);
-    bookSave.appendChild(document.createTextNode('Save'));
-    bookSave.addEventListener('click', function() {
-        self.setBookTitle(book, bookTitle.value);
+    containerNode.innerHTML = html;
+    var bookName = containerNode.querySelector('.input-book-new-name');
+    containerNode.querySelector('.form-book-edit').addEventListener('submit', function(e) {
+        var bookId = parseInt(e.srcElement.dataset.bookId);
+        self.setBookTitle(bookId, bookName.value);
+        e.preventDefault();
     });
-    containerNode.appendChild(bookSave);
-    var bookCancel = document.createElement('button');
-    bookCancel.setAttribute('id', 'book-edit-cancel-btn-' + book.id);
-    bookCancel.appendChild(document.createTextNode('Cancel'));
-    bookCancel.addEventListener('click', function() {
-        self.switchToDisplayMode(book);
+    containerNode.querySelector('.button-edit-cancel').addEventListener('click', function(e) {
+        var bookId = parseInt(e.srcElement.dataset.bookId);
+        self.switchToDisplayMode(bookId);
     });
-    containerNode.appendChild(bookCancel);
     return containerNode;
 };
 
 _bdp.generateDeletableGuts = function(book) {
     var self = this;
+    var template = document.getElementById('tmpl-book-delete').innerHTML;
+    var html = template
+                    .replace(/{{book.name}}/g, book.name)
+                    .replace(/{{book.id}}/g, book.id);
     var containerNode = document.createElement('span');
-    var bookTitle = document.createTextNode(book.name);
-    containerNode.appendChild(bookTitle);
-    var bookDelete = document.createElement('button');
-    bookDelete.setAttribute('id', 'book-delete-confirm-btn-' + book.id);
-    bookDelete.appendChild(document.createTextNode('Confirm'));
-    bookDelete.addEventListener('click', function() {
-        self.removeBook(book);
+    containerNode.innerHTML = html;
+    containerNode.querySelector('.button-delete-confirm').addEventListener('click', function(e) {
+        var bookId = parseInt(e.srcElement.dataset.bookId);
+        self.removeBook(bookId);
     });
-    containerNode.appendChild(bookDelete);
-    var bookCancel = document.createElement('button');
-    bookCancel.setAttribute('id', 'book-delete-cancel-btn-' + book.id);
-    bookCancel.appendChild(document.createTextNode('Cancel'));
-    bookCancel.addEventListener('click', function() {
-        self.switchToDisplayMode(book);
+    containerNode.querySelector('.button-delete-cancel').addEventListener('click', function(e) {
+        var bookId = parseInt(e.srcElement.dataset.bookId);
+        self.switchToDisplayMode(bookId);
     });
-    containerNode.appendChild(bookCancel);
     return containerNode;
 };
 
