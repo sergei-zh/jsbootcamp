@@ -13,7 +13,7 @@ _bdp.showBookList = function() {
     while (bookList.hasChildNodes()) {
         bookList.removeChild(bookList.lastChild);
     }
-    var books = self._bookStore.all();
+    var books = self._bookStore.getAllBooks();
     for (var bookIndex in books) {
         var book = books[bookIndex];
         var bookNode = self.generateBookNode(book);
@@ -34,7 +34,8 @@ _bdp.removeBook = function(bookId) {
     var bookList = document.getElementById('book-list');
     var bookNode = document.getElementById('book-container-' + bookId);
     if (bookNode) {
-        self._bookStore.remove(bookId);
+        var book = self._bookStore.getBookById(bookId);
+        self._bookStore.removeBook(book);
         bookList.removeChild(bookNode);
     }
 };
@@ -44,7 +45,7 @@ _bdp.renameBook = function(bookId) {
     var bookNameInput = document.getElementById('inp-book-new-name-' + bookId);
     if (bookNameInput) {
         var bookName = bookNameInput.value;
-        var book = self._bookStore.findBooksById(bookId)[0];
+        var book = self._bookStore.getBookById(bookId);
         self.setBookTitle(book, bookName);
     }
 };
@@ -55,7 +56,11 @@ _bdp.setBookTitle = function(bookId, newTitle) {
         alert('New name cannot be empty');
         return;
     }    
-    var book = self._bookStore.findBooksById(bookId)[0];
+    if (!self._bookStore.bookNameIsAvailable(newTitle.trim(), bookId)) {
+        alert('New name should not conflict with other books');
+        return;
+    }    
+    var book = self._bookStore.getBookById(bookId);
     book.name = newTitle;
     self.switchToDisplayMode(bookId);
 };
@@ -67,7 +72,7 @@ _bdp.switchToEditMode = function(bookId) {
         while (bookNode.hasChildNodes()) {
             bookNode.removeChild(bookNode.lastChild);
         }
-        var book = self._bookStore.findBooksById(bookId)[0];
+        var book = self._bookStore.getBookById(bookId);
         var editableGuts = self.generateEditableGuts(book);
         bookNode.appendChild(editableGuts);
     }
@@ -80,7 +85,7 @@ _bdp.switchToDisplayMode = function(bookId) {
         while (bookNode.hasChildNodes()) {
             bookNode.removeChild(bookNode.lastChild);
         }
-        var book = self._bookStore.findBooksById(bookId)[0];
+        var book = self._bookStore.getBookById(bookId);
         var displayableGuts = self.generateDisplayableGuts(book);
         bookNode.appendChild(displayableGuts);
     }
@@ -93,7 +98,7 @@ _bdp.switchToDeleteMode = function(bookId) {
         while (bookNode.hasChildNodes()) {
             bookNode.removeChild(bookNode.lastChild);
         }
-        var book = self._bookStore.findBooksById(bookId)[0];
+        var book = self._bookStore.getBookById(bookId);
         var deletableGuts = self.generateDeletableGuts(book);
         bookNode.appendChild(deletableGuts);
     }
@@ -137,9 +142,9 @@ _bdp.generateEditableGuts = function(book) {
     containerNode.innerHTML = html;
     var bookName = containerNode.querySelector('.input-book-new-name');
     containerNode.querySelector('.form-book-edit').addEventListener('submit', function(e) {
+        e.preventDefault();
         var bookId = parseInt(e.srcElement.dataset.bookId);
         self.setBookTitle(bookId, bookName.value);
-        e.preventDefault();
     });
     containerNode.querySelector('.button-edit-cancel').addEventListener('click', function(e) {
         var bookId = parseInt(e.srcElement.dataset.bookId);
@@ -169,23 +174,19 @@ _bdp.generateDeletableGuts = function(book) {
 
 _bdp.appendNewBook = function() {
     var self = this;
-    var newBookName = document.getElementById('new-book-name').value;
-    if (newBookName.trim() === '') {
+    var newBookName = document.getElementById('new-book-name').value.trim();
+    if (newBookName === '') {
         alert('Book name cannot be empty');
         return;
     }
-    var newBook = {name: newBookName};
-    if (self._bookStore.containsBook(newBook)) {
+    if (!self._bookStore.bookNameIsAvailable(newBookName)) {
         alert('The Book is already in the directory');
         return;
     }
-    var res = self._bookStore.add(newBook);
-    if (res.length === 1) {
-        self.appendBook(res.shift());
-        document.getElementById('new-book-name').value = '';
-    } else {
-        alert('Unable to add the book');
-    }
+    var newBook = {name: newBookName};
+    var res = self._bookStore.addBook(newBook);
+    self.appendBook(res);
+    document.getElementById('new-book-name').value = '';
 };
 
 _bdp.setupAddBookListener = function() {
@@ -208,10 +209,10 @@ _bdp.run = function() {
 
 var bookStore = new BookStore();
 
-bookStore.add({name: 'Pride and Prejudice'});
-bookStore.add({name: 'A Tale of Two Cities' });
-bookStore.add({name: 'Treasure Island'});
-bookStore.add({name: 'Dracula'});
+bookStore.addBook({name: 'Pride and Prejudice'});
+bookStore.addBook({name: 'A Tale of Two Cities' });
+bookStore.addBook({name: 'Treasure Island'});
+bookStore.addBook({name: 'Dracula'});
 
 var bookDirectory = new BookDirectory(bookStore);
 bookDirectory.run();

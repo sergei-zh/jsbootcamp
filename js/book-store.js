@@ -1,69 +1,48 @@
-define(function() {
+define(['event-emitter'], function(EventEmitter) {
 "use strict";
 
 function BookStore() {
     this._books = [];
+    this._eventEmitter = new EventEmitter();
 }
 
 var _bsp = BookStore.prototype;
 
-_bsp.add = function() {
-    var booksAdded = [];
-    var self = this;
-    for (var argIndex = 0; argIndex < arguments.length; argIndex++) {
-        var argument = arguments[argIndex];
-        if (Array.isArray(argument)) {
-            self.addArray(argument).forEach(function(res) {
-                booksAdded.push(res);
-            });
-        } else if (self.isBook(argument)) {
-            self.addSingleBook(argument).forEach(function(res) {
-                booksAdded.push(res);
-            });
+_bsp.containsBook = function(book) {
+    if (this.bookNameIsAvailable(book.name)) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
+_bsp.bookNameIsAvailable = function(bookName, exceptionId) {
+    for (var bookIndex in this._books) {
+        var knownBook = this._books[bookIndex];
+        if (knownBook.name.toUpperCase() === bookName.toUpperCase()) {
+            if (knownBook.id !== exceptionId) {
+                return false;
+            }
         }
     }
-    return booksAdded;
+    return true;
 };
 
-_bsp.addArray = function(books) {
-    var booksAdded = [];
-    var self = this;
-    books.forEach(function(book) {
-        self.add(book).forEach(function(res) {
-            if (res) {
-                booksAdded.push(res);
-            }
-        });
-    });
-    return booksAdded;
-};
-
-_bsp.addSingleBook = function(book) {
-    var addedBooks = [];
+_bsp.addBook = function(book) {
+    if (!this._isBook(book)) {
+        throw 'Book required';
+    }
     if (this.containsBook(book)) {
         /* Ignore a book with known name */
-        return addedBooks;
+        throw 'The book is already in the storage';
     }
-
-    if (!book.id) {
-        book.id = this.generateBookId();
-    }
+    book.id = this._generateBookId();
     this._books.push(book);
-    addedBooks.push(book);
-    return addedBooks;
+    this._eventEmitter.emitEvent('book-added', book);
+    return book;
 };
 
-_bsp.containsBook = function(book) {
-    for (var bookIndex = 0; bookIndex < this._books.length; bookIndex++) {
-        var knownBook = this._books[bookIndex];
-        if (knownBook.name.toUpperCase() === book.name.toUpperCase()) {
-            return true;
-        }
-    }
-    return false;
-};
-
-_bsp.generateBookId = function() {
+_bsp._generateBookId = function() {
     var maxBookId = 0;
     this._books.forEach(function(book) {
         if (book.id > maxBookId) {
@@ -73,63 +52,23 @@ _bsp.generateBookId = function() {
     return maxBookId + 1;
 };
 
-_bsp.remove = function() {
-    var booksRemoved = [];
-    var self = this;
-    for (var argIndex = 0; argIndex < arguments.length; argIndex++) {
-        var argument = arguments[argIndex];
-        if (self.isArray(argument)) {
-            self.removeArray(argument).forEach(function(res){
-                booksRemoved.push(res);
-            });
-        } else if (self.isStoredBook(argument)) {
-            self.removeBooksById(argument.id).forEach(function(res){
-                booksRemoved.push(res);
-            });
-        } else if (self.isNumber(argument)) {
-            self.removeBooksById(argument).forEach(function(res){
-                booksRemoved.push(res);
-            });
-        } 
+_bsp.removeBook = function(book) {
+    if (!this._isBook(book)) {
+        throw 'Book required';
     }
-    return booksRemoved;
-};
-
-_bsp.removeArray = function(books) {
-    var booksRemoved = [];
-    var self = this;
-    books.forEach(function(book) {
-        self.remove(book).forEach(function(res) {
-            if (res) {
-                booksRemoved.push(res);
-            }
-        });
-    });
-    return booksRemoved;
-};
-
-_bsp.removeBooksById = function(bookId) {
-    for (var bookIndex = 0; bookIndex < this._books.length; bookIndex++) {
+    for (var bookIndex in this._books) {
         var knownBook = this._books[bookIndex];
-        if (knownBook.id === bookId) {
-            return this._books.splice(bookIndex, 1);
+        if (knownBook.id === book.id) {
+            this._books.splice(bookIndex, 1);
+            this._eventEmitter.emitEvent('book-deleted', book);
+            return book;
         }
     }
-    return [];
+    throw 'The book is not found';
 };
 
-_bsp.find = function(argument) {
-    var booksFound = [];
-    if (this.isString(argument)) {
-        this.findBooksByName(argument).forEach(function(res) {
-            booksFound.push(res);
-        });
-    } else if (this.isNumber(argument)) {
-        this.findBooksById(argument).forEach(function(res) {
-            booksFound.push(res);
-        });
-    } 
-    return booksFound;
+_bsp.getAllBooks = function() {
+    return this._books.slice(0);
 };
 
 _bsp.findBooksByName = function(name) {
@@ -142,47 +81,21 @@ _bsp.findBooksByName = function(name) {
     return foundBooks;
 };
 
-_bsp.findBooksById = function(bookId) {
-    var foundBooks = []; 
-    this._books.forEach(function(knownBook) {
-    	if (knownBook.id === bookId) {
-            foundBooks.push(knownBook);
-    	}
-    });
-    return foundBooks;
-};
-
-_bsp.all = function() {
-    return this._books.slice(0);
-};
-
-_bsp.print = function() {
-    var self = this;
-    if (arguments.length === 0) {
-        self._books.forEach(function(book) {
-            console.log(book);
-        });
-    } else {
-        for (var argIndex = 0; argIndex < arguments.length; argIndex++) {
-            var argument = arguments[argIndex];
-            if (self.isArray(argument)) {
-                argument.forEach(function(el) {
-                    if (self.isObject(el)) {
-                        console.log(el);
-                    }
-                });
-            } else if (self.isObject(argument)) {
-                console.log(argument);
-            }
+_bsp.getBookById = function(bookId) {
+    for (var bookIndex in this._books) {
+        var knownBook = this._books[bookIndex];
+        if (knownBook.id === bookId) {
+            return knownBook;
         }
     }
+    throw 'The book is not found';
 };
 
-_bsp.isArray = function(argument) {
+_bsp._isArray = function(argument) {
     return Array.isArray(argument);    
 };
 
-_bsp.isObject = function(argument) {
+_bsp._isObject = function(argument) {
     return (
             (argument !== null) 
             && 
@@ -190,25 +103,25 @@ _bsp.isObject = function(argument) {
     );    
 };
 
-_bsp.isNumber = function(argument) {
+_bsp._isNumber = function(argument) {
     return (typeof argument === 'number');    
 };
 
-_bsp.isString = function(argument) {
+_bsp._isString = function(argument) {
     return (typeof argument === 'string');    
 };
 
-_bsp.isBook = function(argument) {
+_bsp._isBook = function(argument) {
     return (
-            this.isObject(argument) 
+            this._isObject(argument) 
             &&
             (argument.name)
     );    
 };
 
-_bsp.isStoredBook = function(argument) {
+_bsp._isStoredBook = function(argument) {
     return (
-            this.isBook(argument) 
+            this._isBook(argument) 
             && 
             (argument.id)
     );    
