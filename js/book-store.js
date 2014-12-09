@@ -91,6 +91,10 @@ _bsp.getBookById = function(bookId) {
     throw 'The book is not found';
 };
 
+_bsp.getEventEmitter = function() {
+    return this._eventEmitter;
+};
+
 _bsp._isArray = function(argument) {
     return Array.isArray(argument);    
 };

@@ -2,7 +2,15 @@ define(["./book-store"], function(BookStore) {
 "use strict";
 
 function BookDirectory(bookStore) {
-    this._bookStore = bookStore;
+    var self = this;
+    self._bookStore = bookStore;
+    
+    self._bookStore.getEventEmitter().subscribe('book-added', function(book){
+        self.appendBook(book);
+    });
+    self._bookStore.getEventEmitter().subscribe('book-deleted', function(book){
+        self.removeBook(book);
+    });
 }
 
 var _bdp = BookDirectory.prototype;
@@ -29,13 +37,11 @@ _bdp.appendBook = function(book) {
     bookList.appendChild(bookNode);
 };
 
-_bdp.removeBook = function(bookId) {
+_bdp.removeBook = function(book) {
     var self = this;
     var bookList = document.getElementById('book-list');
-    var bookNode = document.getElementById('book-container-' + bookId);
+    var bookNode = document.getElementById('book-container-' + book.id);
     if (bookNode) {
-        var book = self._bookStore.getBookById(bookId);
-        self._bookStore.removeBook(book);
         bookList.removeChild(bookNode);
     }
 };
@@ -163,7 +169,8 @@ _bdp.generateDeletableGuts = function(book) {
     containerNode.innerHTML = html;
     containerNode.querySelector('.button-delete-confirm').addEventListener('click', function(e) {
         var bookId = parseInt(e.srcElement.dataset.bookId);
-        self.removeBook(bookId);
+        var book = self._bookStore.getBookById(bookId);
+        self._bookStore.removeBook(book);
     });
     containerNode.querySelector('.button-delete-cancel').addEventListener('click', function(e) {
         var bookId = parseInt(e.srcElement.dataset.bookId);
@@ -184,8 +191,7 @@ _bdp.appendNewBook = function() {
         return;
     }
     var newBook = {name: newBookName};
-    var res = self._bookStore.addBook(newBook);
-    self.appendBook(res);
+    self._bookStore.addBook(newBook);
     document.getElementById('new-book-name').value = '';
 };
 
