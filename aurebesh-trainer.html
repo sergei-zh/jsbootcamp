@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style type="text/css">
+        @font-face {
+            font-family: "Aurebesh";
+            src: url(/jsbootcamp/fonts/Aurebesh.otf) format("truetype");
+        }
+        @font-face {
+            font-family: "AurebeshInv";
+            src: url(/jsbootcamp/fonts/AurebeshINV.otf) format("truetype");
+        }
+        @font-face {
+            font-family: "AurebeshTech";
+            src: url(/jsbootcamp/fonts/AureTech.otf) format("truetype");
+        }
+        @font-face {
+            font-family: "AurebeshTechInv";
+            src: url(/jsbootcamp/fonts/AureTechINV.otf) format("truetype");
+        }
+        p.aurebesh { 
+            font-family: "Aurebesh", Verdana, Tahoma;
+            font-size: 72px;
+        }
+        p.aurebeshInv { 
+            font-family: "AurebeshInv", Verdana, Tahoma;
+            font-size: 36px;
+        }
+        p.aurebeshTech { 
+            font-family: "AurebeshTech", Verdana, Tahoma;
+            font-size: 36px;
+        }
+        p.aurebeshTechInv { 
+            font-family: "AurebeshTechInv", Verdana, Tahoma;
+            font-size: 36px;
+        }
+        </style>
+    </head>
+    <body>
+        <div>TODO write content</div>
+        <div><p id="task-place" class="aurebesh"></p></div>
+        <div>
+            <form id="answer-form">
+            <input type="text" id="answer">
+            <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div><p id="result-place"></p></div>
+        <p class="aurebesh">Hello world!</p>    
+        <p class="aurebeshInv">Hello world!</p>    
+        <p class="aurebeshTech">Hello world!</p>    
+        <p class="aurebeshTechInv">Hello world!</p> 
+        <script type="text/javascript">
+            var letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
+                'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
+                'W', 'X', 'Y', 'Z'];
+            
+            function generateTask() {
+                var letterIndex = Math.floor((Math.random() * letters.length));
+                var letter = letters[letterIndex];
+                var taskPlace = document.querySelector('#task-place');
+                taskPlace.textContent = letter;
+                var answerForm = document.querySelector('#answer-form');
+                answerForm.dataset.answer = letter;
+                var answerNode = document.querySelector('#answer');
+                answerNode.value = '';
+                answerNode.focus();
+            }
+            
+            generateTask();
+            
+            var form = document.querySelector('#answer-form');
+            form.addEventListener('submit', function(e) {
+               e.preventDefault();
+               var answerNode = document.querySelector('#answer');
+               var answer = answerNode.value;
+               var correctAnswer = form.dataset.answer;
+               var resultNode = document.querySelector('#result-place');
+               if (answer.toUpperCase() === correctAnswer.toUpperCase()) {
+                   resultNode.textContent = 'OK';
+               } else {
+                   resultNode.textContent = 'Wrong:' + correctAnswer;
+               }
+               generateTask();
+            });
+        </script>
+    </body>
+</html>
